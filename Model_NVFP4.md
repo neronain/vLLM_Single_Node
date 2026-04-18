@@ -53,3 +53,50 @@ docker run --gpus all \
 
 เซฟไฟล์แล้วรันสคริปต์ `./start_gemma_sec.sh` ใหม่อีกรอบได้เลยครับ
 
+---
+
+### 💡 วิธีแก้: ถ้าไม่อยากให้มัน `pip install` ใหม่ทุกรอบ (การทำ Custom Image)
+
+ถ้าคุณรู้สึกว่าการรอให้มันติดตั้ง Library ใหม่ทุกครั้งเสียเวลา คุณสามารถสร้าง **"Docker Image ของคุณเอง"** ที่ฝังการอัปเดตพวกนี้ไว้ถาวรได้เลยครับ ใช้เวลาทำแค่ 2 นาที:
+
+**1. สร้างไฟล์ชื่อ `Dockerfile` (ไม่ต้องมีนามสกุล)**
+พิมพ์ `nano Dockerfile` แล้ววางโค้ดนี้ลงไป:
+
+```dockerfile
+# ใช้ Image ตั้งต้นของ NVIDIA
+FROM nvcr.io/nvidia/vllm:26.02-py3
+
+# สั่งอัปเดต Library ไว้ล่วงหน้าเลย
+RUN pip install --upgrade mistral_common git+https://github.com/huggingface/transformers.git
+```
+*(เซฟและออกจาก nano)*
+
+**2. สั่ง Build Image ใหม่ (ทำแค่ครั้งเดียว)**
+รันคำสั่งนี้ในโฟลเดอร์ที่มี `Dockerfile` เพื่อสร้าง Image ใหม่ชื่อ `vllm-gemma4-ready`:
+```bash
+docker build -t vllm-gemma4-ready .
+```
+*(รอจนมันติดตั้งเสร็จ)*
+
+**3. แก้สคริปต์ `start_gemma_sec.sh` ให้สะอาดขึ้น**
+คราวนี้คุณสามารถลบโค้ดส่วนที่ยุ่งยากออกได้เลย เพราะ Image ตัวใหม่มีทุกอย่างพร้อมแล้วครับ:
+
+```bash
+#!/bin/bash
+export HF_MODEL_HANDLE="AEON-7/Gemma-4-26B-A4B-it-Uncensored-NVFP4"
+export HF_TOKEN="ใส่_Token_ที่สร้างใหม่ของคุณตรงนี้"
+
+docker run --gpus all \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    --env "HUGGING_FACE_HUB_TOKEN=$HF_TOKEN" \
+    -p 8000:8000 \
+    --ipc=host \
+    vllm-gemma4-ready \
+    vllm serve ${HF_MODEL_HANDLE} \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --trust-remote-code \
+    --max-model-len 8192 \
+    --gpu-memory-utilization 0.9
+```
+
