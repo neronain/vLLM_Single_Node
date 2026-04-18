@@ -94,11 +94,7 @@ chmod +x start_vllm.sh
 ```bash
 ./start_vllm.sh
 ```
-
-อ้างอิง<br>
-https://build.nvidia.com/spark/vllm/instructions <br>
-https://huggingface.co/
-
+---
 การใช้งาน vLLM ผ่าน Docker ร่วมกับการ Mount Volume
 ```bash
 -v ~/.cache/huggingface:/root/.cache/huggingface \
@@ -126,7 +122,7 @@ docker rmi nvcr.io/nvidia/vllm
 
 เมื่อหน้าจอฝั่งที่รันเซิร์ฟเวอร์ขึ้นข้อความว่า Uvicorn running on http://0.0.0.0:8000 (หรือคล้ายๆ กัน) แปลว่าเซิร์ฟเวอร์พร้อมรับคำสั่งแล้ว
 
-
+---
   คุณสามารถเปิด Terminal หน้าต่างใหม่ขึ้นมาอีกอัน (อย่าปิดหน้าต่างที่รันเซิร์ฟเวอร์ค้างไว้นะครับ) แล้วใช้คำสั่งเพื่อทดสอบได้เลย เนื่องจาก vLLM ออกแบบมาให้เข้ากันได้กับโครงสร้างของ OpenAI API (OpenAI-compatible) เราจึงสามารถทดสอบได้ 2 วิธีง่ายๆ ดังนี้ครับ:
 
 
